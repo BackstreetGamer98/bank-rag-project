@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BANK Operations</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --ink: #14233c; --ink-soft: #4a5a72; --blue: #1f4e89; --blue-dark: #173d6b;
+    --mist: #edf1f5; --paper: #fff; --line: #d5dce5; --brass: #a57f2c;
+    --green: #1e7a5a; --green-tint: #e8f5ef; --amber: #9a5a00; --amber-tint: #fff4e0; --red: #b3261e; --red-tint: #fdeceb;
+    --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--mist); color: var(--ink); font: 15px/1.55 var(--sans); display: flex; flex-direction: column; overflow: hidden; }
+  button, input, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid #7aa7e0; outline-offset: 2px; }
+  header { background: var(--ink); color: #fff; border-bottom: 3px solid var(--brass); display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 58px; flex: none; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .wordmark { font: 600 21px/1 var(--serif); }
+  .divider { width: 1px; height: 22px; background: #ffffff40; }
+  .product { font-size: 14px; color: #c9d4e6; }
+  .spacer { flex: 1; }
+  .back { color: #dbe5f5; font-size: 13px; text-decoration: none; border: 1px solid #ffffff30; border-radius: 999px; padding: 4px 12px; }
+  .back:hover { background: #ffffff18; }
+  main { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 24px 40px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font: 600 26px/1.2 var(--serif); margin: 0 0 4px; }
+  h2 { font: 600 18px/1.25 var(--serif); margin: 0 0 8px; }
+  .sub { margin: 0 0 18px; color: var(--ink-soft); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .tile { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .tile b { display: block; font: 600 26px/1.2 var(--serif); }
+  .tile span { font-size: 13px; color: var(--ink-soft); }
+  .tile small { display: block; font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; }
+  .bars { display: grid; gap: 6px; }
+  .bar { display: grid; grid-template-columns: 140px 1fr 36px; gap: 10px; align-items: center; font-size: 13.5px; }
+  .bar i { display: block; height: 10px; border-radius: 5px; background: var(--blue); min-width: 2px; }
+  .bar em { font-style: normal; text-align: right; color: var(--ink-soft); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid #e8ecf1; vertical-align: top; }
+  th { background: #f4f7fa; font-weight: 600; }
+  td.mono, .mono { font-family: var(--mono); font-size: 12px; }
+  .st-answered { color: var(--green); font-weight: 600; }
+  .st-refused { color: var(--amber); font-weight: 600; }
+  .st-error { color: var(--red); font-weight: 600; }
+  .spans { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #eef2f6; min-width: 110px; }
+  .spans i { display: block; height: 100%; }
+  details summary { cursor: pointer; color: var(--blue); }
+  textarea { width: 100%; min-height: 110px; border: 1px solid #aeb9c9; border-radius: 6px; padding: 8px 10px; background: #fff; resize: vertical; }
+  .btn { margin-top: 10px; background: var(--blue); color: #fff; border: 0; border-radius: 8px; height: 42px; padding: 0 18px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: var(--blue-dark); }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 0 0; }
+  .msg { font-size: 13.5px; margin: 8px 0 0; }
+  .msg.err { color: var(--red); }
+  .job { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 10px; background: #fbfcfd; }
+  .job-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .progress { height: 8px; border-radius: 4px; background: #e4eaf1; overflow: hidden; margin: 8px 0 4px; }
+  .progress i { display: block; height: 100%; background: var(--green); }
+  .pill { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 9px; background: var(--mist); }
+  .pill.done { color: var(--green); background: var(--green-tint); }
+  .pill.running, .pill.queued { color: var(--amber); background: var(--amber-tint); }
+  .pill.failed { color: var(--red); background: var(--red-tint); }
+  .empty { color: var(--ink-soft); padding: 8px 0; }
+  @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } .bar { grid-template-columns: 110px 1fr 30px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <rect width="30" height="30" rx="6" fill="#1f4e89"/>
+      <path d="M5 11c3-3 5-3 7.500 0s5 3 7.500 0 3-2 5-1" fill="none" stroke="#d9b45c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 17c3-3 5-3 7.500 0s5 3 7.500 0 3-2 5-1" fill="none" stroke="#d9b45c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 23c3-3 5-3 7.500 0s5 3 7.500 0 3-2 5-1" fill="none" stroke="#d9b45c" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="wordmark">BANK</span><span class="divider"></span><span class="product">Operations</span>
+  </div>
+  <span class="spacer"></span>
+  <a class="back" href="/">Policy Desk</a>
+</header>
+
+<main><div class="wrap">
+  <h1>AI gateway operations</h1>
+  <p class="sub">Last 24 hours. Refreshes every 5 seconds.</p>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid">
+    <div>
+      <section class="panel"><h2>Recent requests</h2><div id="recent"></div></section>
+    </div>
+    <div>
+      <section class="panel"><h2>Where requests went</h2><div class="bars" id="routes"></div>
+        <h2 style="margin-top:16px">Why questions were not answered</h2><div class="bars" id="reasons"></div></section>
+      <section class="panel">
+        <h2>Batch questions</h2>
+        <p class="hint" style="margin:0 0 8px">One question per line, up to 200. A background worker answers them one by one, so you can leave the page.</p>
+        <label for="batch" class="hint">Questions</label>
+        <textarea id="batch" placeholder="How long do I have to report suspected fraud?&#10;At what cash amount is PAN mandatory?"></textarea>
+        <button class="btn" id="run" type="button">Run batch</button>
+        <p class="msg" id="msg" role="status"></p>
+        <div id="jobs"></div>
+      </section>
+    </div>
+  </div>
+</div></main>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+function h(tag, props = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (v != null) el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null) el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return el;
+}
+const n = x => Number(x).toLocaleString("en-IN");
+const pct = x => Math.round(x * 100) + "%";
+const SPAN_COLOR = { screen: "#8aa4c8", retrieve: "#1f4e89", cache: "#a57f2c", plan: "#6b7f99", generate: "#1e7a5a" };
+const ROUTE_LABEL = { cache: "Answered from cache", small: "Small model", large: "Large model", fallback: "Fallback model", blocked: "Stopped by budget", none: "Stopped by guardrails" };
+const REASON_LABEL = { injection: "Tried to change the rules", advice: "Asked for advice", no_relevant_policy: "No matching policy", model_declined: "Model found no answer", no_valid_citation: "No valid citation", budget_exceeded: "Token budget used up", provider_error: "AI provider error", ai_unavailable: "AI unavailable, closest clause shown" };
+
+function bars(el, data, labels) {
+  const entries = Object.entries(data);
+  if (!entries.length) return el.replaceChildren(h("div", { class: "empty" }, "Nothing yet."));
+  const max = Math.max(...entries.map(e => e[1]));
+  el.replaceChildren(...entries.map(([k, v]) => h("div", { class: "bar" }, h("span", {}, labels[k] || k), h("i", { style: "width:" + Math.max(2, v / max * 100) + "%" }), h("em", {}, String(v)))));
+}
+function spanBar(spans) {
+  const total = spans.reduce((a, s) => a + s.ms, 0) || 1;
+  return h("div", { class: "spans", title: spans.map(s => s.name + " " + s.ms + " ms").join(", ") },
+    spans.map(s => h("i", { style: "width:" + s.ms / total * 100 + "%;background:" + (SPAN_COLOR[s.name] || "#999") })));
+}
+async function refreshMetrics() {
+  const m = await (await fetch("/api/metrics")).json();
+  const todayTokens = m.budget.today.reduce((a, t) => a + t.tokens, 0);
+  $("#tiles").replaceChildren(
+    tile(n(m.requests), "Requests", m.errors ? m.errors + " provider errors" : "no provider errors"),
+    tile(pct(m.answered_rate), "Answered", "the rest were refused or failed"),
+    tile(pct(m.cache_hit_rate), "Cache hit rate", m.cache_hits + " AI calls saved"),
+    tile(m.latency_ms.p50 + " ms", "Median time", "95th percentile " + m.latency_ms.p95 + " ms"),
+    tile(n(todayTokens), "Tokens today", "limit " + n(m.budget.daily_per_team) + " per team"),
+    tile("INR " + m.cost_inr.toFixed(2), "Notional cost", "free models cost nothing; this is a demo price"));
+  bars($("#routes"), m.routes, ROUTE_LABEL);
+  bars($("#reasons"), m.reasons, REASON_LABEL);
+  const box = $("#recent");
+  if (!m.recent.length) return box.replaceChildren(h("div", { class: "empty" }, "No requests yet. Ask a question in Policy Desk and it appears here."));
+  box.replaceChildren(h("table", {}, h("thead", {}, h("tr", {}, ["Trace", "Result", "Route", "Tokens", "Time", "Steps"].map(t => h("th", {}, t)))),
+    h("tbody", {}, m.recent.map(r => h("tr", {},
+      h("td", { class: "mono" }, r.trace),
+      h("td", { class: "st-" + r.status }, r.status + (r.reason ? ": " + (REASON_LABEL[r.reason] || r.reason) : "")),
+      h("td", {}, (r.cache === "hit" ? "cache" : r.tier) + (r.model ? " · " + r.model.split("/").pop() : "")),
+      h("td", {}, n(r.tokens)), h("td", {}, r.ms + " ms"), h("td", {}, spanBar(r.spans)))))));
+}
+function tile(big, label, small) { return h("div", { class: "tile" }, h("b", {}, big), h("span", {}, label), h("small", {}, small)); }
+
+/* ---------- batch jobs ---------- */
+let openJobs = new Set();
+async function refreshJobs() {
+  const jobs = await (await fetch("/api/jobs")).json();
+  const box = $("#jobs");
+  if (!jobs.length) return box.replaceChildren();
+  const full = await Promise.all(jobs.map(j => openJobs.has(j.id) ? fetch("/api/jobs/" + j.id).then(r => r.json()) : j));
+  box.replaceChildren(...full.map(j => {
+    const el = h("div", { class: "job" },
+      h("div", { class: "job-head" }, h("span", { class: "pill " + j.status }, j.status), h("span", { class: "mono" }, j.id), h("span", {}, j.finished + " of " + j.total + " done" + (j.failed ? ", " + j.failed + " failed" : ""))),
+      h("div", { class: "progress" }, h("i", { style: "width:" + (j.total ? j.finished / j.total * 100 : 0) + "%" })));
+    if (j.error) el.append(h("p", { class: "msg err" }, j.error));
+    const d = h("details", { ontoggle: e => { if (e.target.open && !openJobs.has(j.id)) { openJobs.add(j.id); refreshJobs(); } else if (!e.target.open) openJobs.delete(j.id); } }, h("summary", {}, "Show answers"));
+    if (j.items && j.items.length) d.append(h("table", {}, h("tbody", {}, j.items.map(i => h("tr", {},
+      h("td", {}, i.question),
+      h("td", {}, i.status === "done" ? (i.result.status === "answered" ? i.result.answer + (i.result.cache === "hit" ? " (cached)" : "") : "Not answered: " + (REASON_LABEL[i.result.reason] || i.result.reason)) : i.status === "failed" ? "Failed: " + (i.error || "") : i.status))))));
+    d.open = openJobs.has(j.id);
+    el.append(d);
+    return el;
+  }));
+}
+$("#run").addEventListener("click", async () => {
+  const lines = $("#batch").value.split("\n").map(s => s.trim()).filter(Boolean);
+  const msg = $("#msg");
+  msg.className = "msg";
+  if (!lines.length) { msg.className = "msg err"; msg.textContent = "Type at least one question first."; return; }
+  $("#run").disabled = true;
+  try {
+    const res = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questions: lines }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not start the batch.");
+    msg.textContent = "Batch " + data.job_id + " started with " + lines.length + " questions.";
+    $("#batch").value = "";
+    refreshJobs();
+  } catch (e) { msg.className = "msg err"; msg.textContent = e.message; }
+  $("#run").disabled = false;
+});
+function tick() { refreshMetrics().catch(() => {}); refreshJobs().catch(() => {}); }
+tick(); setInterval(tick, 5000);
+</script>
+</body>
+</html>

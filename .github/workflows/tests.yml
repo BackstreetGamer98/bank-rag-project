@@ -1,0 +1,20 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Unit tests (no keys or internet needed)
+        run: python -m unittest discover -s tests
+      - name: Gateway evals (routing runs offline; cache and retrieval parts skip without keys)
+        run: python evals/gateway_evals.py
+      - name: Guardrail evals in search-only mode
+        run: python evals/run_evals.py --max-wrong 1

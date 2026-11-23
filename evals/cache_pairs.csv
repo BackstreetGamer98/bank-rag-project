@@ -1,0 +1,9 @@
+a,b,should_hit
+How long do I have to report suspected fraud?,What is the deadline to report a suspected fraud?,yes
+At what cash amount is PAN mandatory?,Above what cash deposit amount must PAN be collected?,yes
+How often must KYC be refreshed for a high-risk customer?,How frequently does a high-risk customer need a KYC refresh?,yes
+Is video KYC allowed for savings accounts?,Is video KYC allowed for current accounts?,no
+Within how many hours must suspected fraud be reported to FRM?,Within how many days must suspected fraud be reported to FRM?,no
+How often must KYC be refreshed for a high-risk customer?,How often must KYC be refreshed for a low-risk customer?,no
+How long must transaction records be kept?,How long must CCTV footage be kept in fraud cases?,no
+Who approves a personal loan of INR 10 lakh?,Who approves a personal loan of INR 5 lakh?,no
